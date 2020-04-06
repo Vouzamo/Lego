@@ -29,7 +29,7 @@ namespace Lego.App
         {
             bool keepLooking = true;
 
-            var hub = new Hub(this, deviceId) as T;
+            var hub = Activator.CreateInstance(typeof(T), new object[] { this, deviceId }) as T;
 
             var watcher = new BluetoothLEAdvertisementWatcher
             {

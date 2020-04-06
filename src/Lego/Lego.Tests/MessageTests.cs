@@ -3,9 +3,46 @@ using Lego.Core.Models.Messaging;
 using Lego.Core.Models.Messaging.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using Lego.Core.Extensions;
 
 namespace Lego.Tests
 {
+    [TestClass]
+    public class ByteTests
+    {
+        [TestMethod]
+        public void AngularVelocity()
+        {
+            byte speed1 = 1;
+            byte speed2 = 50;
+            byte speed3 = 100;
+            byte speed4 = byte.MinValue;
+            byte speed5 = byte.MaxValue;
+
+            var velocity1A = speed1.AsAngularVelocity(RotateDirection.Clockwise);
+            var velocity1B = speed1.AsAngularVelocity(RotateDirection.CounterClockwise);
+            var velocity2A = speed2.AsAngularVelocity(RotateDirection.Clockwise);
+            var velocity2B = speed2.AsAngularVelocity(RotateDirection.CounterClockwise);
+            var velocity3A = speed3.AsAngularVelocity(RotateDirection.Clockwise);
+            var velocity3B = speed3.AsAngularVelocity(RotateDirection.CounterClockwise);
+            var velocity4A = speed4.AsAngularVelocity(RotateDirection.Clockwise);
+            var velocity4B = speed4.AsAngularVelocity(RotateDirection.CounterClockwise);
+            var velocity5A = speed5.AsAngularVelocity(RotateDirection.Clockwise);
+            var velocity5B = speed5.AsAngularVelocity(RotateDirection.CounterClockwise);
+
+            Assert.AreEqual<sbyte>(1, velocity1A);
+            Assert.AreEqual<sbyte>(-1, velocity1B);
+            Assert.AreEqual<sbyte>(50, velocity2A);
+            Assert.AreEqual<sbyte>(-50, velocity2B);
+            Assert.AreEqual<sbyte>(100, velocity3A);
+            Assert.AreEqual<sbyte>(-100, velocity3B);
+            Assert.AreEqual<sbyte>(0, velocity4A);
+            Assert.AreEqual<sbyte>(0, velocity4B);
+            Assert.AreEqual<sbyte>(100, velocity5A);
+            Assert.AreEqual<sbyte>(-100, velocity5B);
+        }
+    }
+
     [TestClass]
     public class MessageTests
     {

@@ -37,12 +37,12 @@ namespace Lego.App
             var rightTrack = await hubA.PortB<TechnicMotorXL>();
             var turntable = await hubA.PortD<TechnicMotorL>();
 
-            turntable.SetSpeed(100);
+            turntable.SetSpeedForDuration(100, 100, RotateDirection.Clockwise, 3000);
 
-            await Task.Delay(5000);
+            await Task.Delay(3000);
 
-            leftTrack.SetSpeed(100);
-            rightTrack.SetSpeed(100);
+            leftTrack.SetSpeedForDuration(100, 100, RotateDirection.Clockwise, 5000);
+            rightTrack.SetSpeedForDuration(100, 100, RotateDirection.CounterClockwise, 5000);
 
             await Task.Delay(5000);
 
