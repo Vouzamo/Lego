@@ -10,26 +10,22 @@ using System.Threading.Tasks;
 
 namespace Lego.Core
 {
-    public class Hub
+    public abstract class Hub
     {
         public bool IsConnected { get; protected set; } = false;
         protected IConnection Connection { get; set; }
-        public IDictionary<byte, IODevice> ConnectedDevices { get; set; } = new ConcurrentDictionary<byte, IODevice>();
+        public IDictionary<byte, IDevice> ConnectedDevices { get; set; } = new ConcurrentDictionary<byte, IDevice>();
 
         public Queue<IMessage> Messages { get; } = new Queue<IMessage>();
 
-        public Hub()
+        public Hub(IConnection connection)
         {
-
+            Connection = connection;
         }
 
-        public void Connect(IConnection connection)
+        public async Task Connect()
         {
-            connection.Connect(this);
-
-            Connection = connection;
-
-            IsConnected = true;
+            await Connection.Connect(this);
         }
 
         public void ReceiveMessage(IMessage message)
@@ -72,7 +68,7 @@ namespace Lego.Core
             Connection.SendMessage(message);
         }
 
-        public async Task<T> EstablishDeviceConnectionByInterface<T, TType>() where T : TType where TType : IODevice
+        public async Task<T> EstablishDeviceConnectionByInterface<T, TType>() where T : TType where TType : IDevice
         {
             while (!ConnectedDevices.OfType<TType>().Any())
             {
@@ -82,7 +78,7 @@ namespace Lego.Core
             return (T)ConnectedDevices.OfType<TType>().First();
         }
 
-        public async Task<T> EstablishDeviceConnectionByPort<T>(byte port) where T : IODevice
+        public async Task<T> EstablishDeviceConnectionByPort<T>(byte port) where T : IDevice
         {
             while(!ConnectedDevices.ContainsKey(port))
             {

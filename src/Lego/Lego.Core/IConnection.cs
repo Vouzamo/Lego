@@ -8,9 +8,4 @@ namespace Lego.Core
         Task Connect(Hub hub);
         void SendMessage(IMessage message);
     }
-
-    public interface IConnectionManager
-    {
-        Task<T> EstablishHubConnectionById<T>(string deviceId) where T : Hub, new();
-    }
 }

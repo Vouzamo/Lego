@@ -1,6 +1,6 @@
 ﻿namespace Lego.Core.Models.Devices
 {
-    public interface IMotor : IODevice
+    public interface IMotor : IDevice
     {
         
     }

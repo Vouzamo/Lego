@@ -1,6 +1,6 @@
 ﻿namespace Lego.Core
 {
-    public class Device : IODevice
+    public class Device : IDevice
     {
         public Hub Hub { get; }
         public byte Port { get; }

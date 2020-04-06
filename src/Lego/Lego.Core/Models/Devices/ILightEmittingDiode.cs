@@ -1,6 +1,6 @@
 ﻿namespace Lego.Core.Models.Devices
 {
-    public interface ILightEmittingDiode : IODevice
+    public interface ILightEmittingDiode : IDevice
     {
 
     }

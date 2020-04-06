@@ -1,6 +1,7 @@
 ﻿using Lego.Core;
 using Lego.Core.Models.Messaging.Messages;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -26,6 +27,20 @@ namespace Lego.App
 
         public async Task Connect(Hub hub)
         {
+            //while(Device.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
+            //{
+            //    var replacementDevice = await BluetoothLEDevice.FromIdAsync(Device.DeviceId);
+
+            //    if(replacementDevice != null)
+            //    {
+            //        Device = replacementDevice;
+            //    }
+            //    else
+            //    {
+            //        await Task.Delay(500);
+            //    }
+            //}
+
             var service = await GetService();
 
             if (service.Session.CanMaintainConnection)
@@ -80,48 +95,50 @@ namespace Lego.App
         }
     }
 
-    public class BluetoothLEConnectionManager : IConnectionManager
+    public class BluetoothLEConnectionManager : IDisposable
     {
+        protected ConcurrentDictionary<string, BluetoothLEConnection> Connections { get; set; } = new ConcurrentDictionary<string, BluetoothLEConnection>();
+        protected BluetoothLEAdvertisementWatcher Watcher { get; }
+
         public BluetoothLEConnectionManager()
         {
-
-        }
-
-        public async Task<T> EstablishHubConnectionById<T>(string deviceId) where T : Hub, new()
-        {
-            var hub = new T();
-
-            var watcher = new BluetoothLEAdvertisementWatcher
+            Watcher = new BluetoothLEAdvertisementWatcher
             {
                 ScanningMode = BluetoothLEScanningMode.Active
             };
 
-            watcher.Received += async (w, btAdv) => {
-                var device = await BluetoothLEDevice.FromBluetoothAddressAsync(btAdv.BluetoothAddress);
+            Watcher.Received += async (w, btAdv) => {
                 
-                if(device != null)
+                var device = await BluetoothLEDevice.FromBluetoothAddressAsync(btAdv.BluetoothAddress);
+
+                if (device != null)
                 {
                     Debug.WriteLine($"BLEWATCHER Found: {device.DeviceId}");
 
-                    if (device.DeviceId == deviceId)
+                    if(!Connections.ContainsKey(device.DeviceId))
                     {
-                        var connection = new BluetoothLEConnection(device);
-
-                        hub.Connect(connection);
+                        Connections.AddOrUpdate(device.DeviceId, new BluetoothLEConnection(device), (key, value) => value);
                     }
                 }
+
             };
 
-            watcher.Start();
+            Watcher.Start();
+        }
 
-            while(!hub.IsConnected)
+        public async Task<IConnection> FindConnectionById(string deviceId)
+        {
+            while (!Connections.ContainsKey(deviceId))
             {
                 await Task.Delay(500);
             }
 
-            watcher.Stop();
+            return Connections[deviceId];
+        }
 
-            return hub;
+        public void Dispose()
+        {
+            Watcher.Stop();
         }
     }
 }
