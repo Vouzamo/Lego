@@ -1,4 +1,5 @@
 ﻿using Lego.Core;
+using Lego.Core.Models.Messaging.Messages;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,11 +25,11 @@ namespace Lego.App
 
         }
 
-        public async Task<Hub> EstablishHubConnectionById(string deviceId)
+        public async Task<T> EstablishHubConnectionById<T>(string deviceId) where T : Hub
         {
             bool keepLooking = true;
 
-            var hub = new Hub(this, deviceId);
+            var hub = new Hub(this, deviceId) as T;
 
             var watcher = new BluetoothLEAdvertisementWatcher
             {

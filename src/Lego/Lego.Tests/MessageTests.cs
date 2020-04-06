@@ -1,4 +1,6 @@
 using Lego.Core;
+using Lego.Core.Models.Messaging;
+using Lego.Core.Models.Messaging.Messages;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 

@@ -1,5 +1,7 @@
 ﻿using Lego.Core;
 using Lego.Core.Extensions;
+using Lego.Core.Models.Devices.Hubs;
+using Lego.Core.Models.Devices.Parts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,12 +30,12 @@ namespace Lego.App
         {
             var connection = new BluetoothLEConnection();
 
-            var hubA = await connection.EstablishHubConnectionById("BluetoothLE#BluetoothLEb8:31:b5:93:3c:8c-90:84:2b:4d:d2:62");
-            //var hubB = await connection.EstablishHubConnectionById("BluetoothLE#BluetoothLEb8:31:b5:93:3c:8c-90:84:2b:4e:1b:dd");
+            var hubA = await connection.EstablishHubConnectionById<TechnicSmartHub>("BluetoothLE#BluetoothLEb8:31:b5:93:3c:8c-90:84:2b:4d:d2:62");
+            //var hubB = await connection.EstablishHubConnectionById<TechnicSmartHub>("BluetoothLE#BluetoothLEb8:31:b5:93:3c:8c-90:84:2b:4e:1b:dd");
 
-            var leftTrack = await hubA.EstablishDeviceConnectionByPort<TechnicMotor>(0);
-            var rightTrack = await hubA.EstablishDeviceConnectionByPort<TechnicMotor>(1);
-            var turntable = await hubA.EstablishDeviceConnectionByPort<TechnicMotor>(3);
+            var leftTrack = await hubA.PortA<TechnicMotorXL>();
+            var rightTrack = await hubA.PortB<TechnicMotorXL>();
+            var turntable = await hubA.PortD<TechnicMotorL>();
 
             turntable.SetSpeed(100);
 
