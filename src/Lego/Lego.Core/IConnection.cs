@@ -5,10 +5,12 @@ namespace Lego.Core
 {
     public interface IConnection
     {
-        Task<T> EstablishHubConnectionById<T>(string deviceId) where T : Hub;
+        Task Connect(Hub hub);
+        void SendMessage(IMessage message);
+    }
 
-        event EventHandler<IMessage> OnMessageReceived;
-
-        void SendMessage(string deviceId, IMessage message);
+    public interface IConnectionManager
+    {
+        Task<T> EstablishHubConnectionById<T>(string deviceId) where T : Hub, new();
     }
 }

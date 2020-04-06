@@ -16,20 +16,80 @@ namespace Lego.App
 {
     public class BluetoothLEConnection : IConnection
     {
-        protected List<BluetoothLEDevice> Devices { get; set; } = new List<BluetoothLEDevice>();
+        protected Hub ConnectedHub { get; set; }
+        protected BluetoothLEDevice Device { get; set; }
 
-        public event EventHandler<IMessage> OnMessageReceived;
+        public BluetoothLEConnection(BluetoothLEDevice device)
+        {
+            Device = device;
+        }
 
-        public BluetoothLEConnection()
+        public async Task Connect(Hub hub)
+        {
+            var service = await GetService();
+
+            if (service.Session.CanMaintainConnection)
+            {
+                service.Session.MaintainConnection = true;
+            }
+
+            ConnectedHub = hub;
+
+            var characteristic = await GetCharacteristic(service);
+
+            characteristic.ValueChanged += Characteristic_ValueChanged;
+            
+            var result = await characteristic.WriteClientCharacteristicConfigurationDescriptorWithResultAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+        }
+
+        private void Characteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
+        {
+            var buffer = args.CharacteristicValue;
+
+            CryptographicBuffer.CopyToByteArray(buffer, out byte[] bytes);
+
+            var message = new Message(bytes);
+
+            ConnectedHub.ReceiveMessage(message);
+        }
+
+        public async Task<GattDeviceService> GetService()
+        {
+            var services = await Device.GetGattServicesAsync();
+            var service = services.Services.Single(s => s.Uuid.Equals(new Guid("00001623-1212-efde-1623-785feabcd123")));
+
+            return service;
+        }
+
+        public async Task<GattCharacteristic> GetCharacteristic(GattDeviceService service)
+        {
+            var characteristics = await service.GetCharacteristicsAsync();
+            var characteristic = characteristics.Characteristics.Single(c => c.Uuid == new Guid("00001624-1212-efde-1623-785feabcd123"));
+
+            return characteristic;
+        }
+
+        public async void SendMessage(IMessage message)
+        {
+            var buffer = CryptographicBuffer.CreateFromByteArray(message.Bytes.ToArray());
+
+            var service = await GetService();
+            var characteristic = await GetCharacteristic(service);
+            
+            var result = await characteristic.WriteValueWithResultAsync(buffer);
+        }
+    }
+
+    public class BluetoothLEConnectionManager : IConnectionManager
+    {
+        public BluetoothLEConnectionManager()
         {
 
         }
 
-        public async Task<T> EstablishHubConnectionById<T>(string deviceId) where T : Hub
+        public async Task<T> EstablishHubConnectionById<T>(string deviceId) where T : Hub, new()
         {
-            bool keepLooking = true;
-
-            var hub = Activator.CreateInstance(typeof(T), new object[] { this, deviceId }) as T;
+            var hub = new T();
 
             var watcher = new BluetoothLEAdvertisementWatcher
             {
@@ -45,25 +105,16 @@ namespace Lego.App
 
                     if (device.DeviceId == deviceId)
                     {
-                        var services = await device.GetGattServicesAsync();
-                        var service = services.Services.FirstOrDefault(s => s.Uuid.Equals(new Guid("00001623-1212-efde-1623-785feabcd123")));
+                        var connection = new BluetoothLEConnection(device);
 
-                        var characteristics = await service.GetCharacteristicsAsync();
-                        var characteristic = characteristics.Characteristics.FirstOrDefault(c => c.Uuid == new Guid("00001624-1212-efde-1623-785feabcd123"));
-
-                        characteristic.ValueChanged += OnValueChanged;
-
-                        var result = await characteristic.WriteClientCharacteristicConfigurationDescriptorWithResultAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-
-                        Devices.Add(device);
-                        keepLooking = false;
+                        hub.Connect(connection);
                     }
                 }
             };
 
             watcher.Start();
 
-            while(keepLooking)
+            while(!hub.IsConnected)
             {
                 await Task.Delay(500);
             }
@@ -71,36 +122,6 @@ namespace Lego.App
             watcher.Stop();
 
             return hub;
-        }
-
-        private void OnValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
-        {
-            var buffer = args.CharacteristicValue;
-
-            CryptographicBuffer.CopyToByteArray(buffer, out byte[] bytes);
-
-            var message = new Message(bytes);
-
-            var deviceId = sender.Service.DeviceId;
-
-            var device = Devices.FirstOrDefault(d => d.DeviceId.Equals(deviceId));
-
-            OnMessageReceived.Invoke(this, message);
-        }
-
-        public async void SendMessage(string deviceId, IMessage message)
-        {
-            var device = Devices.FirstOrDefault(d => d.DeviceId.Equals(deviceId));
-
-            var services = await device.GetGattServicesAsync();
-            var service = services.Services.FirstOrDefault(s => s.Uuid.Equals(new Guid("00001623-1212-efde-1623-785feabcd123")));
-
-            var characteristics = await service.GetCharacteristicsAsync();
-            var characteristic = characteristics.Characteristics.FirstOrDefault(c => c.Uuid == new Guid("00001624-1212-efde-1623-785feabcd123"));
-
-            var buffer = CryptographicBuffer.CreateFromByteArray(message.Bytes.ToArray());
-
-            var result = await characteristic.WriteValueWithResultAsync(buffer);
         }
     }
 }

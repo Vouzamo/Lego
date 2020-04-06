@@ -2,6 +2,7 @@
 using Lego.Core.Models.Devices.Parts;
 using Lego.Core.Models.Messaging;
 using Lego.Core.Models.Messaging.Messages;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,22 +12,27 @@ namespace Lego.Core
 {
     public class Hub
     {
-        public string DeviceId { get; }
-        protected IConnection Connection { get; }
+        public bool IsConnected { get; protected set; } = false;
+        protected IConnection Connection { get; set; }
         public IDictionary<byte, IODevice> ConnectedDevices { get; set; } = new ConcurrentDictionary<byte, IODevice>();
 
         public Queue<IMessage> Messages { get; } = new Queue<IMessage>();
 
-        public Hub(IConnection connection, string deviceId)
+        public Hub()
         {
-            DeviceId = deviceId;
+
+        }
+
+        public void Connect(IConnection connection)
+        {
+            connection.Connect(this);
 
             Connection = connection;
 
-            Connection.OnMessageReceived += ProcessMessage;
+            IsConnected = true;
         }
 
-        private void ProcessMessage(object sender, IMessage message)
+        public void ReceiveMessage(IMessage message)
         {
             if(message.MessageType == MessageType.Hub__Attached_IO)
             {
@@ -63,7 +69,7 @@ namespace Lego.Core
 
         public void SendMessage(IMessage message)
         {
-            Connection.SendMessage(DeviceId, message);
+            Connection.SendMessage(message);
         }
 
         public async Task<T> EstablishDeviceConnectionByInterface<T, TType>() where T : TType where TType : IODevice
