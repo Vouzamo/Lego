@@ -30,7 +30,7 @@ namespace Lego.Core
 
         public void ReceiveMessage(IMessage message)
         {
-            if(message.MessageType == MessageType.Hub__Attached_IO)
+            if (message.MessageType == MessageType.Hub__Attached_IO)
             {
                 var attachedIOMessage = new AttachedIOMessage(message.Bytes.ToArray());
 
@@ -55,6 +55,33 @@ namespace Lego.Core
                                 break;
                         }
                         break;
+                }
+            }
+            else if(message.MessageType == MessageType.Port_Information)
+            {
+                var portInformationMessage = new PortInformationMessage(message.Bytes.ToArray());
+
+                if (ConnectedDevices.ContainsKey(portInformationMessage.Port))
+                {
+                    ConnectedDevices[portInformationMessage.Port].ReceiveMessage(portInformationMessage);
+                }
+            }
+            else if(message.MessageType == MessageType.Port_Input_Format__Single)
+            {
+                var portInputFormatMessage = new PortInputFormatMessage(message.Bytes.ToArray());
+
+                if (ConnectedDevices.ContainsKey(portInputFormatMessage.Port))
+                {
+                    ConnectedDevices[portInputFormatMessage.Port].ReceiveMessage(portInputFormatMessage);
+                }
+            }
+            else if(message.MessageType == MessageType.Port_Value__Single)
+            {
+                var portValueMessage = new PortValueMessage(message.Bytes.ToArray());
+
+                if(ConnectedDevices.ContainsKey(portValueMessage.Port))
+                {
+                    ConnectedDevices[portValueMessage.Port].ReceiveMessage(portValueMessage);
                 }
             }
             else

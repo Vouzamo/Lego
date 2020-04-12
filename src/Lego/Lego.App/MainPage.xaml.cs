@@ -1,9 +1,11 @@
 ﻿using Lego.Core;
 using Lego.Core.Extensions;
+using Lego.Core.Models.Devices.General;
 using Lego.Core.Models.Devices.Hubs;
 using Lego.Core.Models.Devices.Parts;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
@@ -51,26 +53,30 @@ namespace Lego.App
                 var tertiaryBoom = await hubB.PortC<TechnicMotorL>();
                 var bucket = await hubB.PortD<TechnicMotorL>();
 
-                // Naive commands that could be improved later on with calibration routines specific to the model configuration (e.g. motors connected to linear actuators could be calibrated to store absolute range of moment instead of relying on internal clutches etc).
+                primaryBoom.SetSpeedForDuration(100, 50, RotateDirection.Clockwise, 2000);
+                bucket.SetSpeedForDuration(100, 100, RotateDirection.Clockwise, 2000);
+                await Task.Delay(2000);
 
-                // move forwards for 5 seconds
-                leftTrack.SetSpeedForDuration(50, 100, RotateDirection.Clockwise, 5000);
-                rightTrack.SetSpeedForDuration(50, 100, RotateDirection.CounterClockwise, 5000);
-                await Task.Delay(5000);
+                await primaryBoom.AutoCalibrate(50);
+                await secondaryBoom.AutoCalibrate(50);
+                await tertiaryBoom.AutoCalibrate(40);
+                await bucket.AutoCalibrate(30);
 
-                // rotate boom for 3 seconds
-                turntable.SetSpeedForDuration(100, 100, RotateDirection.CounterClockwise, 3000);
-                await Task.Delay(3000);
-
-                // reposition boom
-                primaryBoom.SetSpeedForDuration(100, 100, RotateDirection.Clockwise, 3000);
-                secondaryBoom.SetSpeedForDuration(75, 100, RotateDirection.CounterClockwise, 3000);
-                tertiaryBoom.SetSpeedForDuration(100, 100, RotateDirection.CounterClockwise, 2000);
-
-                await Task.Delay(3000);
-
-                // lift bucket
-                bucket.SetSpeedForDuration(50, 100, RotateDirection.Clockwise, 2000);
+                // Routine to toggle between the calibrated min and max absolute position.
+                do
+                {
+                    primaryBoom.GotoAbsolutePositionMin(100, 100);
+                    secondaryBoom.GotoAbsolutePositionMin(100, 100);
+                    tertiaryBoom.GotoAbsolutePositionMin(100, 100);
+                    bucket.GotoAbsolutePositionMin(100, 100);
+                    await Task.Delay(15000);
+                    primaryBoom.GotoAbsolutePositionMax(100, 100);
+                    secondaryBoom.GotoAbsolutePositionMax(100, 100);
+                    tertiaryBoom.GotoAbsolutePositionMax(100, 100);
+                    bucket.GotoAbsolutePositionMax(100, 100);
+                    await Task.Delay(15000);
+                }
+                while (true);
             }
         }
     }

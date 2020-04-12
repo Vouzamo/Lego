@@ -11,12 +11,12 @@ namespace Lego.Core.Extensions
             return bytes.Skip(skip).Take(take).ToList();
         }
 
-        public static sbyte AsAngularVelocity(this byte speed, RotateDirection direction)
+        public static byte AsAngularVelocity(this byte speed, RotateDirection direction)
         {
             var rotationalSpeed = Math.Min(Math.Max(speed, (byte)0), (byte)100);
             sbyte angularVelocity = Convert.ToSByte(rotationalSpeed * (sbyte)direction);
 
-            return angularVelocity;
+            return unchecked((byte)angularVelocity);
         }
     }
 }

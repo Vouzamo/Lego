@@ -30,16 +30,16 @@ namespace Lego.Tests
             var velocity5A = speed5.AsAngularVelocity(RotateDirection.Clockwise);
             var velocity5B = speed5.AsAngularVelocity(RotateDirection.CounterClockwise);
 
-            Assert.AreEqual<sbyte>(1, velocity1A);
-            Assert.AreEqual<sbyte>(-1, velocity1B);
-            Assert.AreEqual<sbyte>(50, velocity2A);
-            Assert.AreEqual<sbyte>(-50, velocity2B);
-            Assert.AreEqual<sbyte>(100, velocity3A);
-            Assert.AreEqual<sbyte>(-100, velocity3B);
-            Assert.AreEqual<sbyte>(0, velocity4A);
-            Assert.AreEqual<sbyte>(0, velocity4B);
-            Assert.AreEqual<sbyte>(100, velocity5A);
-            Assert.AreEqual<sbyte>(-100, velocity5B);
+            Assert.AreEqual<byte>(1, velocity1A);
+            Assert.AreEqual<byte>(0b11111111, velocity1B);
+            Assert.AreEqual<byte>(50, velocity2A);
+            Assert.AreEqual<byte>(0b11001110, velocity2B);
+            Assert.AreEqual<byte>(100, velocity3A);
+            Assert.AreEqual<byte>(0b10011100, velocity3B);
+            Assert.AreEqual<byte>(0, velocity4A);
+            Assert.AreEqual<byte>(0, velocity4B);
+            Assert.AreEqual<byte>(100, velocity5A);
+            Assert.AreEqual<byte>(0b10011100, velocity5B);
         }
     }
 

@@ -1,7 +1,8 @@
-﻿namespace Lego.Core.Models.Devices.Parts
-{
+﻿using Lego.Core.Models.Devices.General;
 
-    public class TechnicMotorL : Device, IMotor
+namespace Lego.Core.Models.Devices.Parts
+{
+    public class TechnicMotorL : Motor
     {
         public TechnicMotorL(Hub hub, byte port) : base(hub, port)
         {
