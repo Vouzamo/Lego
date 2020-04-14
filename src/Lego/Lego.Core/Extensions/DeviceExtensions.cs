@@ -3,11 +3,17 @@ using Lego.Core.Models.Messaging.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lego.Core.Extensions
 {
     public static class DeviceExtensions
     {
+        public async static Task RunRoutine<T>(this T device, BaseRoutine<T> routine) where T : IDevice
+        {
+            await routine.Run(device);
+        }
+
         public static void SetSpeed(this IMotor device, int speed)
         {
             throw new NotImplementedException("speed needs to be a byte and assigned to the body of the message.");

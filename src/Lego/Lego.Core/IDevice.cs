@@ -1,4 +1,5 @@
 ﻿using Lego.Core.Models.Messaging.Messages;
+using System.Threading.Tasks;
 
 namespace Lego.Core
 {
@@ -7,6 +8,7 @@ namespace Lego.Core
         Hub Hub { get; }
         byte Port { get; }
 
+        void SetInputModes(byte[] modes, uint delta = 1, bool notify = true);
         void SendMessage(IMessage message);
         void ReceiveMessage(IMessage message);
     }

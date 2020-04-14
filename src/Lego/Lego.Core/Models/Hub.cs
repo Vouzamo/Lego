@@ -2,7 +2,6 @@
 using Lego.Core.Models.Devices.Parts;
 using Lego.Core.Models.Messaging;
 using Lego.Core.Models.Messaging.Messages;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;

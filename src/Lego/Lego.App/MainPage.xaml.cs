@@ -23,7 +23,7 @@ namespace Lego.App
 
         public MainPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
             DoStuff();
         }
@@ -53,30 +53,35 @@ namespace Lego.App
                 var tertiaryBoom = await hubB.PortC<TechnicMotorL>();
                 var bucket = await hubB.PortD<TechnicMotorL>();
 
-                primaryBoom.SetSpeedForDuration(100, 50, RotateDirection.Clockwise, 2000);
-                bucket.SetSpeedForDuration(100, 100, RotateDirection.Clockwise, 2000);
                 await Task.Delay(2000);
 
-                await primaryBoom.AutoCalibrate(50);
-                await secondaryBoom.AutoCalibrate(50);
-                await tertiaryBoom.AutoCalibrate(40);
-                await bucket.AutoCalibrate(30);
+                //await Task.WhenAll(new Task[] {
+                //    primaryBoom.RunRoutine(new RangeCalibrationRoutine(55)),
+                //    secondaryBoom.RunRoutine(new RangeCalibrationRoutine(50)),
+                //    tertiaryBoom.RunRoutine(new RangeCalibrationRoutine(40)),
+                //    bucket.RunRoutine(new RangeCalibrationRoutine(35))
+                //});
 
-                // Routine to toggle between the calibrated min and max absolute position.
-                do
-                {
-                    primaryBoom.GotoAbsolutePositionMin(100, 100);
-                    secondaryBoom.GotoAbsolutePositionMin(100, 100);
-                    tertiaryBoom.GotoAbsolutePositionMin(100, 100);
-                    bucket.GotoAbsolutePositionMin(100, 100);
-                    await Task.Delay(15000);
-                    primaryBoom.GotoAbsolutePositionMax(100, 100);
-                    secondaryBoom.GotoAbsolutePositionMax(100, 100);
-                    tertiaryBoom.GotoAbsolutePositionMax(100, 100);
-                    bucket.GotoAbsolutePositionMax(100, 100);
-                    await Task.Delay(15000);
-                }
-                while (true);
+                await primaryBoom.RunRoutine(new RangeCalibrationRoutine(50));
+                await secondaryBoom.RunRoutine(new RangeCalibrationRoutine(50));
+                await tertiaryBoom.RunRoutine(new RangeCalibrationRoutine(40));
+                await bucket.RunRoutine(new RangeCalibrationRoutine(35));
+
+                //// Routine to toggle between the calibrated min and max absolute position.
+                //do
+                //{
+                //    primaryBoom.GotoAbsolutePositionMin(100, 100);
+                //    secondaryBoom.GotoAbsolutePositionMin(100, 100);
+                //    tertiaryBoom.GotoAbsolutePositionMin(100, 100);
+                //    bucket.GotoAbsolutePositionMin(100, 100);
+                //    await Task.Delay(15000);
+                //    primaryBoom.GotoAbsolutePositionMax(100, 100);
+                //    secondaryBoom.GotoAbsolutePositionMax(100, 100);
+                //    tertiaryBoom.GotoAbsolutePositionMax(100, 100);
+                //    bucket.GotoAbsolutePositionMax(100, 100);
+                //    await Task.Delay(15000);
+                //}
+                //while (true);
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Lego.Core.Models.Messaging;
 using Lego.Core.Models.Messaging.Messages;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lego.Core
 {

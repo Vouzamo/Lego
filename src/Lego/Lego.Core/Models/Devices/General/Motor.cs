@@ -12,12 +12,12 @@ namespace Lego.Core.Models.Devices.General
         public const byte INPUT_MODE__SPEED = 0x01;
         public const byte INPUT_MODE__POSITION = 0x02;
 
-        public int MinPosition { get; protected set; } = int.MinValue;
-        public int MaxPosition { get; protected set; } = int.MaxValue;
+        public int MinPosition { get; set; } = int.MinValue;
+        public int MaxPosition { get; set; } = int.MaxValue;
         public int MidPosition => (MinPosition + MaxPosition) / 2;
 
-        public int Position { get; protected set; }
-        public byte Speed { get; protected set; }
+        public int Position { get; set; }
+        public byte Speed { get; set; }
 
         public Motor(Hub hub, byte port) : base(hub, port)
         {
@@ -35,49 +35,6 @@ namespace Lego.Core.Models.Devices.General
             {
                 Speed = bytes.ElementAt(1);
             }
-        }
-
-        public async Task AutoCalibrate(byte power)
-        {
-            this.SetInputModes(new byte[] { Motor.INPUT_MODE__SPEED });
-
-            await Task.Delay(1000);
-
-            this.GotoAbsolutePositionMin(100, power);
-
-            do
-            {
-                await Task.Delay(1000);
-            }
-            while (this.Speed > 0);
-
-            this.SetInputModes(new[] { Motor.INPUT_MODE__POSITION });
-
-            await Task.Delay(1000);
-
-            int? minPosition = Position;
-
-            this.SetInputModes(new[] { Motor.INPUT_MODE__SPEED });
-
-            await Task.Delay(1000);
-
-            this.GotoAbsolutePositionMax(100, power);
-
-            do
-            {
-                await Task.Delay(1000);
-            }
-            while (this.Speed > 0);
-
-            this.SetInputModes(new[] { Motor.INPUT_MODE__POSITION });
-
-            await Task.Delay(1000);
-
-            int? maxPosition = Position;
-            MinPosition = minPosition.Value;
-            MaxPosition = maxPosition.Value;
-
-            this.GotoAbsolutePositionMid(100, 100);
         }
     }
 }
