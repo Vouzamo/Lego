@@ -65,9 +65,27 @@ namespace Lego.Core
                     ConnectedDevices[portInformationMessage.Port].ReceiveMessage(portInformationMessage);
                 }
             }
+            else if (message.MessageType == MessageType.Port_Mode_Information)
+            {
+                var portModeInformationMessage = new PortModeInformationMessage(message.Bytes.ToArray());
+
+                if (ConnectedDevices.ContainsKey(portModeInformationMessage.Port))
+                {
+                    ConnectedDevices[portModeInformationMessage.Port].ReceiveMessage(portModeInformationMessage);
+                }
+            }
             else if(message.MessageType == MessageType.Port_Input_Format__Single)
             {
-                var portInputFormatMessage = new PortInputFormatMessage(message.Bytes.ToArray());
+                var portInputFormatMessage = new PortInputFormatSingleMessage(message.Bytes.ToArray());
+
+                if (ConnectedDevices.ContainsKey(portInputFormatMessage.Port))
+                {
+                    ConnectedDevices[portInputFormatMessage.Port].ReceiveMessage(portInputFormatMessage);
+                }
+            }
+            else if(message.MessageType == MessageType.Port_Input_Format__Combined_Mode)
+            {
+                var portInputFormatMessage = new PortInputFormatCombinedMessage(message.Bytes.ToArray());
 
                 if (ConnectedDevices.ContainsKey(portInputFormatMessage.Port))
                 {
@@ -76,9 +94,18 @@ namespace Lego.Core
             }
             else if(message.MessageType == MessageType.Port_Value__Single)
             {
-                var portValueMessage = new PortValueMessage(message.Bytes.ToArray());
+                var portValueMessage = new PortValueSingleMessage(message.Bytes.ToArray());
 
                 if(ConnectedDevices.ContainsKey(portValueMessage.Port))
+                {
+                    ConnectedDevices[portValueMessage.Port].ReceiveMessage(portValueMessage);
+                }
+            }
+            else if (message.MessageType == MessageType.Port_Value__Combined_Mode)
+            {
+                var portValueMessage = new PortValueCombinedMessage(message.Bytes.ToArray());
+
+                if (ConnectedDevices.ContainsKey(portValueMessage.Port))
                 {
                     ConnectedDevices[portValueMessage.Port].ReceiveMessage(portValueMessage);
                 }
@@ -94,19 +121,9 @@ namespace Lego.Core
             Connection.SendMessage(message);
         }
 
-        public async Task<T> EstablishDeviceConnectionByInterface<T, TType>() where T : TType where TType : IDevice
-        {
-            while (!ConnectedDevices.OfType<TType>().Any())
-            {
-                await Task.Delay(250);
-            }
-
-            return (T)ConnectedDevices.OfType<TType>().First();
-        }
-
         public async Task<T> EstablishDeviceConnectionByPort<T>(byte port) where T : IDevice
         {
-            while(!ConnectedDevices.ContainsKey(port))
+            while(!ConnectedDevices.ContainsKey(port) || !ConnectedDevices[port].IsReady)
             {
                 await Task.Delay(250);
             }

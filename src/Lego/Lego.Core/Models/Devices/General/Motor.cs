@@ -21,19 +21,35 @@ namespace Lego.Core.Models.Devices.General
 
         public Motor(Hub hub, byte port) : base(hub, port)
         {
-            //SendMessage(new PortInputFormatSetupMessage(Port, INPUT_MODE__POSITION, 1, true));
-            //SendMessage(new PortInputFormatSetupMessage(Port, INPUT_MODE__SPEED, 1, true));
+            
         }
 
         public override void HandleValue(byte[] bytes)
         {
-            if (InputMode == INPUT_MODE__POSITION)
+            var modes = InputMode.ToModes();
+
+            if(modes.Any())
             {
-                Position = BitConverter.ToInt32(bytes, 1);
-            }
-            else if (InputMode == INPUT_MODE__SPEED)
-            {
-                Speed = bytes.ElementAt(1);
+                if(modes.Count() > 1)
+                {
+                    // Combined Mode
+
+                    Speed = bytes.ElementAt(1);
+                    Position = BitConverter.ToInt32(bytes, 2);
+                }
+                else
+                {
+                    // Single Mode
+
+                    if (modes.First() == INPUT_MODE__SPEED)
+                    {
+                        Speed = bytes.ElementAt(1);
+                    }
+                    else if (modes.First() == INPUT_MODE__POSITION)
+                    {
+                        Position = BitConverter.ToInt32(bytes, 1);
+                    }
+                }
             }
         }
     }

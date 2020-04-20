@@ -8,7 +8,10 @@ namespace Lego.Core
         Hub Hub { get; }
         byte Port { get; }
 
-        void SetInputModes(byte[] modes, uint delta = 1, bool notify = true);
+        bool IsReady { get; }
+
+        void SetSingleInputMode(byte mode, uint delta = 1, bool notify = true);
+        Task<bool> SetCombinedInputMode(byte combinationModeIndex, uint delta = 1, bool notify = true);
         void SendMessage(IMessage message);
         void ReceiveMessage(IMessage message);
     }

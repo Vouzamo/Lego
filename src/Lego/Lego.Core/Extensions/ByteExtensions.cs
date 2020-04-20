@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Lego.Core.Models.Messaging;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,6 +19,23 @@ namespace Lego.Core.Extensions
             sbyte angularVelocity = Convert.ToSByte(rotationalSpeed * (sbyte)direction);
 
             return unchecked((byte)angularVelocity);
+        }
+
+        public static IEnumerable<byte> ToModes(this ModeCombinations combination)
+        {
+            var modes = new List<byte>();
+
+            var bits = new BitArray(BitConverter.GetBytes((ushort)combination));
+
+            for (byte i = 0; i < bits.Length; i++)
+            {
+                if(bits[i])
+                {
+                    modes.Add(i);
+                }
+            }
+
+            return modes;
         }
     }
 }

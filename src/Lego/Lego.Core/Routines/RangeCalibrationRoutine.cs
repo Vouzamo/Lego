@@ -1,5 +1,6 @@
 ﻿using Lego.Core.Extensions;
 using Lego.Core.Models.Devices.General;
+using Lego.Core.Models.Messaging;
 using System;
 using System.Threading.Tasks;
 
@@ -25,8 +26,9 @@ namespace Lego.Core
             //device.SetSpeedForDuration(100, Power, RotateDirection.CounterClockwise, 250);
             //await Task.Delay(750);
 
-            device.SetInputModes(new byte[] { Motor.INPUT_MODE__SPEED });
+            //await device.SetCombinedInputMode(0);
 
+            device.SetSingleInputMode(Motor.INPUT_MODE__SPEED);
             await Task.Delay(1000);
 
             device.GotoAbsolutePositionMin(100, Power);
@@ -37,14 +39,12 @@ namespace Lego.Core
             }
             while (device.Speed > 0);
 
-            device.SetInputModes(new[] { Motor.INPUT_MODE__POSITION });
-
+            device.SetSingleInputMode(Motor.INPUT_MODE__POSITION);
             await Task.Delay(1000);
 
             int? minPosition = device.Position;
 
-            device.SetInputModes(new[] { Motor.INPUT_MODE__SPEED });
-
+            device.SetSingleInputMode(Motor.INPUT_MODE__SPEED);
             await Task.Delay(1000);
 
             device.GotoAbsolutePositionMax(100, Power);
@@ -55,8 +55,7 @@ namespace Lego.Core
             }
             while (device.Speed > 0);
 
-            device.SetInputModes(new[] { Motor.INPUT_MODE__POSITION });
-
+            device.SetSingleInputMode(Motor.INPUT_MODE__POSITION);
             await Task.Delay(1000);
 
             int? maxPosition = device.Position;
